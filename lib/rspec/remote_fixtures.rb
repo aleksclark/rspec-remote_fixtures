@@ -86,6 +86,7 @@ module RSpec
       end
 
       RSpec::Core::World.prepend(World)
+      FactoryBot::SyntaxRunner.include(ExampleGroup) if defined? FactoryBot::SyntaxRunner
     end
 
     # RSpec uses this for global data that's not configuration
