@@ -1,8 +1,17 @@
-# Rspec::Remote::Fixtures
+# RSpec::RemoteFixtures
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/rspec/remote/fixtures`. To experiment with that code, run `bin/console` for an interactive prompt.
+RemoteFixtures is a plugin for RSpec that lets you store test fixture files in s3 to avoid unecessary overhead.
 
-TODO: Delete this and the text above, and describe your gem
+Why would I ever want to use this gem?
+=========================================
+This gem lets you stop committing large fixture files, without having to worry about git-lfs.
+Furthermore, a great many applications use docker images to run in production and CI. If you have
+hundreds of MB worth of fixture files, these files are first downloaded to wherever the image is being built,
+then uploaded, over the network, likely to many different CI workers and production instances.
+Once the files are there, it's likely only a small proportion of these workers actually *need* any particular file.
+
+Thus, rspec-remote-fixtures: A gem that sticks your rspec fixtures in S3, and downloads them transparently
+
 
 ## Installation
 
@@ -16,7 +25,11 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-TODO: Write usage instructions here
+## Warnings
+
+S3 authentication relies on an accurate date. If you are using Timecop, RemoteFixtures will attempt to unfreeze for the 
+while downloading the file, and return, by calling `Timecop.unfreeze` in a block. Other libraries that freeze time may 
+cause downloads to fail.
 
 ## Development
 

@@ -23,7 +23,7 @@ module RSpec
         end
 
         def s3
-          @s3 ||= Aws::S3::Resource.new
+          @s3 ||= Aws::S3::Resource.new(client: Aws::S3::Client.new(http_wire_trace: true))
         end
 
         def upload(path, digest)
@@ -36,13 +36,28 @@ module RSpec
         end
 
         def download(remote_path, local_path)
-          bucket_path = remote_path.to_s.gsub('s3://', '').split('/')[1..].join('/')
-          obj = s3_bucket.object(bucket_path)
-
-          obj.download_file(local_path.to_s)
+          report_download(remote_path, local_path)
+          if defined? Timecop && Timecop.frozen?
+            Timecop.unfreeze do
+              perform_download(remote_path, local_path)
+            end
+          else
+            perform_download(remote_path, local_path)
+          end
         end
 
         private
+
+        def perform_download(remote_path, local_path)
+          bucket_path = remote_path.to_s.gsub('s3://', '').split('/')[1..].join('/')
+          obj = s3_bucket.object(bucket_path)
+          # byebug
+          obj.download_file(local_path.to_s)
+        end
+        def report_download(remote_path, local_path)
+          msg = "#{local_path} not present locally, retrieving from #{remote_path}"
+          RSpec.configuration.reporter.message(msg)
+        end
 
         def digest_match?(obj, digest)
           digest == JSON.parse(obj.etag)
