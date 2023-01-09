@@ -8,20 +8,30 @@ module Rspec
     class FixtureManifestGenerator < ::Rails::Generators::Base
       desc <<~DESC
         Description:
-            Generate a fixture manifest for rspec/remote_fixtures
+            Generate a fixture manifest for rspec/remote_fixtures.
       DESC
+      class_option :files, type: :array, default: [], optional: true
+      class_option :force, type: :boolean, default: false, optional: true
 
       def generate_manifest
-        create_file config.manifest_path, '{}'
+        create_file config.manifest_path, '{}' if !File.exist?(config.manifest_path) || options.force
 
-        say "#{fixture_files.count} fixtures found..."
-        fixture_files.each { |path| add_file(path) }
+        add_files
 
         say "Persisting manifest to #{config.manifest_path}"
         RSpec::RemoteFixtures::Manifest.persist_manifest!
       end
 
       private
+
+      def add_files
+        if options.files.any?
+          options.files.each { |file| add_file(file) }
+        else
+          say "#{fixture_files.count} fixtures found..."
+          fixture_files.each { |path| add_file(path) }
+        end
+      end
 
       def fixture_files
         return @fixture_files if defined? @fixture_files
@@ -39,7 +49,9 @@ module Rspec
       end
 
       def add_file(path)
-        path = Pathname.new(path).relative_path_from(config.fixture_path)
+        path = Pathname.new(path)
+        path = Pathname.new(Dir.pwd).join(path) unless path.absolute?
+        path = path.relative_path_from(config.fixture_path)
         say "Adding #{path} to the manifest.."
         RSpec::RemoteFixtures::Manifest.add_fixture!(path)
       end

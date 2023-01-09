@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'open-uri'
-
 module RSpec
   module RemoteFixtures
     # Hooks into RSpec so that RemoteFixtures is available in examples

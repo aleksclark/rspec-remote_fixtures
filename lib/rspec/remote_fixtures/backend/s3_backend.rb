@@ -23,7 +23,7 @@ module RSpec
         end
 
         def s3
-          @s3 ||= Aws::S3::Resource.new
+          @s3 ||= Aws::S3::Resource.new(client: RemoteFixtures::Config.s3_client)
         end
 
         def upload(path, digest)

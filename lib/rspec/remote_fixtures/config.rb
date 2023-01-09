@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'aws-sdk-s3'
 require_relative 'backend'
 
 module RSpec
@@ -44,6 +45,14 @@ module RSpec
 
       def self.backend_path
         @backend_path
+      end
+
+      def self.s3_client
+        @s3_client ||= Aws::S3::Client.new
+      end
+
+      def self.s3_client=(value)
+        @s3_client = value
       end
 
       def self.check_remote_fixture_digest=(value)
