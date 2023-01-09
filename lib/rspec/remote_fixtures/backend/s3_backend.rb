@@ -37,7 +37,7 @@ module RSpec
 
         def download(remote_path, local_path)
           report_download(remote_path, local_path)
-          if defined? Timecop && Timecop&.frozen? # rubocop:disable Style/SafeNavigation
+          if (defined? Timecop) && Timecop.frozen?
             Timecop.unfreeze do
               perform_download(remote_path, local_path)
             end
@@ -57,7 +57,7 @@ module RSpec
 
         def report_download(remote_path, local_path)
           msg = "#{local_path} not present locally, retrieving from #{remote_path}"
-          RSpec.configuration.reporter.message(msg)
+          RemoteFixtures.report(msg)
         end
 
         def digest_match?(obj, digest)

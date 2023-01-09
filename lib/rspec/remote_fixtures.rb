@@ -71,12 +71,20 @@ module RSpec
 
     def self.log_not_found(relative_path)
       msg = "Warning: fixture #{relative_path} not found in manifest, this spec may fail elsewhere!"
-      RSpec.configuration.reporter.message(msg)
+      report(msg)
     end
 
     def self.upload(relative_path, digest)
       full_path = full_path_from_relative(relative_path)
       backend_inst.upload(full_path, digest)
+    end
+
+    def self.report(msg)
+      if (defined? ::RSpec) && ::RSpec.respond_to?(:configuration)
+        ::RSpec.configuration.reporter.message(msg)
+      else
+        puts msg
+      end
     end
 
     def self.setup_rspec!
