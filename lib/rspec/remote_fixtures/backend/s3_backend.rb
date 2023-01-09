@@ -23,7 +23,7 @@ module RSpec
         end
 
         def s3
-          @s3 ||= Aws::S3::Resource.new(client: Aws::S3::Client.new(http_wire_trace: true))
+          @s3 ||= Aws::S3::Resource.new
         end
 
         def upload(path, digest)
@@ -37,7 +37,7 @@ module RSpec
 
         def download(remote_path, local_path)
           report_download(remote_path, local_path)
-          if defined? Timecop && Timecop.frozen?
+          if defined? Timecop && Timecop&.frozen? # rubocop:disable Style/SafeNavigation
             Timecop.unfreeze do
               perform_download(remote_path, local_path)
             end
@@ -54,6 +54,7 @@ module RSpec
           # byebug
           obj.download_file(local_path.to_s)
         end
+
         def report_download(remote_path, local_path)
           msg = "#{local_path} not present locally, retrieving from #{remote_path}"
           RSpec.configuration.reporter.message(msg)
